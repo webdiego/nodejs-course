@@ -63,26 +63,13 @@ const deleteTour = (req, res) => {
   res.status(204).json({ status: 'success', data: null });
 };
 
-// app.get('/api/v1/tours', getAllTours);
-// app.post('/api/v1/tours', addTour);
-// app.get('/api/v1/tours/:id', getTour);
-// INFO: PUT(we have to send the entire object to update a property) vs PATCH
-// app.patch('/api/v1/tours/:id', updateTour);
-// app.delete('/api/v1/tours/:id', deleteTour);
-
-//Routes
-app.route('/api/v1/tours').get(getAllTours).post(addTour);
-app
-  .route('/api/v1/tours/:id')
-  .get(getTour)
-  .patch(updateTour)
-  .delete(deleteTour);
+//Routes tours
+const tourRouter = express.Router();
+app.use('/api/v1/tours', tourRouter);
+tourRouter.route('/').get(getAllTours).post(addTour);
+tourRouter.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
 
 //------ USERS
-
-const users = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
-);
 const getAllUsers = (req, res) => {
   res
     .status(500)
@@ -108,14 +95,11 @@ const deleteUser = (req, res) => {
     .status(500)
     .json({ status: 'error', message: 'Route is not yet defined' });
 };
-
-app.route('/api/v1/users').get(getAllUsers).post(addUser);
-
-app
-  .route('/api/v1/users/:id')
-  .get(getUser)
-  .patch(updateUser)
-  .delete(deleteUser);
+//Routes users
+const userRouter = express.Router();
+app.use('/api/v1/users', userRouter);
+userRouter.route('/').get(getAllUsers).post(addUser);
+userRouter.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
 
 //Start Server
 const port = 3000;
