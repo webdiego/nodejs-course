@@ -7,7 +7,8 @@ const tours = JSON.parse(
 
 const checkId = (req, res, next, val) => {
   const id = req.params.id * 1;
-  let tour = tours.find((el) => el.id === id);
+
+  const tour = tours.find((el) => el.id === id);
   if (!tour) {
     res.status(404).json({ status: 'error', message: 'This tour not exist!' });
   }
@@ -28,13 +29,13 @@ const getAllTours = (req, res) => {
 
 const getTour = (req, res) => {
   const id = req.params.id * 1;
-  let tour = tours.find((el) => el.id === id);
+  const tour = tours.find((el) => el.id === id);
   res.status(200).json({ status: 'success', data: { tour } });
 };
 
 const addTour = (req, res) => {
   const newId = req.body.id;
-  const newTour = Object.assign({ id: newId }, req.body);
+  const newTour = Object.assign(...req.body, { id: newId });
   tours.push(newTour);
   fs.writeFile(
     `${__dirname}/../dev-data/data/tours-simple.json`,

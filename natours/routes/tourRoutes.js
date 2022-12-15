@@ -1,4 +1,5 @@
 const express = require('express');
+
 const router = express.Router();
 
 const {
@@ -9,7 +10,7 @@ const {
   addTour,
   checkId,
   checkBody,
-} = require('../controllers/tourController.js');
+} = require('../controllers/tourController');
 
 //Middleware param
 router.param('id', checkId);

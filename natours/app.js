@@ -5,7 +5,9 @@ const userRouter = require('./routes/userRoutes');
 
 const app = express();
 // Middleware
-app.use(morgan('dev')); // GET /api/v1/tours 200 1.637 ms - 8628
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev')); // GET /api/v1/tours 200 1.637 ms - 8628
+}
 app.use(express.json());
 app.use((req, res, next) => {
   console.log('Hello from a middleware!🖖');
