@@ -1,6 +1,6 @@
 const dotenv = require('dotenv');
 
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: './.env' });
 // console.log(app.get('env')); //development set by express
 // console.log(process.env); // from node
 
