@@ -8,14 +8,12 @@ const {
   updateTour,
   deleteTour,
   addTour,
-  checkId,
-  checkBody,
 } = require('../controllers/tourController');
 
-//Middleware param
-router.param('id', checkId);
+// //Middleware param
+// router.param('id', checkId);
 
-router.route('/').get(getAllTours).post(checkBody, addTour);
+router.route('/').get(getAllTours).post(addTour);
 router.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
 
 module.exports = router;

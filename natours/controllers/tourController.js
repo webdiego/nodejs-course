@@ -1,58 +1,66 @@
-const fs = require('fs');
+const prisma = require('../prisma.client');
 
-//All tour data
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
-);
-
-const checkId = (req, res, next, val) => {
-  const id = req.params.id * 1;
-
-  const tour = tours.find((el) => el.id === id);
-  if (!tour) {
-    res.status(404).json({ status: 'error', message: 'This tour not exist!' });
-  }
-  next();
-};
-const checkBody = (req, res, next) => {
-  if (!req.body.name || !req.body.price) {
-    return res.status(400).json({ status: 'error', message: 'Values error' });
-  }
-  next();
-};
-
-const getAllTours = (req, res) => {
+const getAllTours = async (req, res) => {
+  const tours = await prisma.tour.findMany();
   res
     .status(200)
     .json({ status: 'success', requested: req.requestTime, data: { tours } });
 };
 
-const getTour = (req, res) => {
-  const id = req.params.id * 1;
-  const tour = tours.find((el) => el.id === id);
+const getTour = async (req, res) => {
+  const tour = await prisma.tour.findUnique({
+    where: {
+      id: Number(req.params.id),
+    },
+  });
+
+  if (!tour) {
+    res.status(400).json({ status: 'error', message: 'Tour not found' });
+    throw new Error('Tour not found');
+  }
+
   res.status(200).json({ status: 'success', data: { tour } });
 };
 
-const addTour = (req, res) => {
-  const newId = req.body.id;
-  const newTour = Object.assign(...req.body, { id: newId });
-  tours.push(newTour);
-  fs.writeFile(
-    `${__dirname}/../dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      res.status(201).json({ status: 'success', data: { tour: newTour } }); //201 CREATED
-    }
-  );
+const addTour = async (req, res) => {
+  //TODO: add validator--> ZOD?
+  const { name, rating, price } = req.body;
+  const newTour = await prisma.tour.create({
+    data: {
+      name,
+      rating,
+      price,
+    },
+  });
+
+  // if (!newTour) {
+  //   res.status(400).json({ status: 'error', message: 'Tour not created' });
+  //   throw new Error('Tour not created');
+  // }
+  res.status(201).json({ status: 'success', data: { tour: newTour } }); //201 CREATED
 };
 
-const updateTour = (req, res) => {
-  res
-    .status(200)
-    .json({ status: 'success', data: { tour: '<Updated tour...></Updated>' } });
+const updateTour = async (req, res) => {
+  const { name, rating, price } = req.body;
+  const tour = await prisma.tour.update({
+    where: {
+      id: Number(req.params.id),
+    },
+    data: {
+      name,
+      rating,
+      price,
+    },
+  });
+  res.status(200).json({ status: 'success', data: { tour: tour } });
 };
 
-const deleteTour = (req, res) => {
+const deleteTour = async (req, res) => {
+  await prisma.tour.delete({
+    where: {
+      id: Number(req.params.id),
+    },
+  });
   res.status(204).json({ status: 'success', data: null });
 };
 
@@ -62,6 +70,4 @@ module.exports = {
   updateTour,
   deleteTour,
   addTour,
-  checkId,
-  checkBody,
 };
