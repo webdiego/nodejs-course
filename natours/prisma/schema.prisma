@@ -6,9 +6,42 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model Tour {
   id      Int      @id @default(autoincrement())
   name   String   @unique
-  rating    Int @default(4)
+  slug String
+  duration Int
+  maxGroupSize Int
+  difficulty String
+  ratingsAverage Int? @default(4)
+  ratingsQuantity Int?
   price Int
+  priceDiscount Int?
+  summary String
+  description String?
+  imageCover String
+  images String[]
+  createdAt DateTime @default(now())
+  startDates DateTime[]
+  secretTour Boolean @default(false)
+  startLocation StartLocation[]
+
+
 }
+model StartLocation {
+  id Int    @id @default(autoincrement())
+  type  String @default("Point")
+  coordinates String[]
+  address String
+  description String
+  day Int
+  tour   Tour   @relation(fields: [StartLocationId], references: [id])
+  StartLocationId     Int    @unique
+}
+// guides: [
+//       {
+//         type: mongoose.Schema.ObjectId,
+//         ref: 'User'
+//       }
+//     ]
