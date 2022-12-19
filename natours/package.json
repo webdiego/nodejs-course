@@ -4,6 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "seed:database": "node dev-data/data/seed.js --import",
+    "clear:database": "node dev-data/data/seed.js --delete",
     "start:dev": "nodemon server.js",
     "start:prod": "NODE_ENV=production nodemon server.js"
   },

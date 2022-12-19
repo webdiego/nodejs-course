@@ -1,3 +1,4 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 const prisma = require('../prisma.client');
 
 //TODO: add validator--> ZOD?
@@ -29,14 +30,11 @@ const getTour = async (req, res, next) => {
 };
 
 const addTour = async (req, res, next) => {
+  const { startLocation, ...rest } = req.body;
+
   try {
-    const { name, rating, price } = req.body;
     const newTour = await prisma.tour.create({
-      data: {
-        name,
-        rating,
-        price,
-      },
+      data: req.body,
     });
     res.status(200).json({ status: 'success', data: { tour: newTour } });
   } catch (error) {

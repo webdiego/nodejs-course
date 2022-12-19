@@ -8,40 +8,19 @@ datasource db {
 }
 
 model Tour {
-  id      Int      @id @default(autoincrement())
-  name   String   @unique
-  slug String
-  duration Int
-  maxGroupSize Int
-  difficulty String
-  ratingsAverage Int? @default(4)
+  id              Int             @id @default(autoincrement())
+  name            String          @unique
+  duration        Int
+  maxGroupSize    Int
+  difficulty      String
+  ratingsAverage  Float?          @default(4.5)
   ratingsQuantity Int?
-  price Int
-  priceDiscount Int?
-  summary String
-  description String?
-  imageCover String
-  images String[]
-  createdAt DateTime @default(now())
-  startDates DateTime[]
-  secretTour Boolean @default(false)
-  startLocation StartLocation[]
-
-
+  price           Int
+  summary         String
+  description     String?
+  imageCover      String
+  images          String[]
+  createdAt       DateTime        @default(now()) @db.Date
+  startDates      String[]
 }
-model StartLocation {
-  id Int    @id @default(autoincrement())
-  type  String @default("Point")
-  coordinates String[]
-  address String
-  description String
-  day Int
-  tour   Tour   @relation(fields: [StartLocationId], references: [id])
-  StartLocationId     Int    @unique
-}
-// guides: [
-//       {
-//         type: mongoose.Schema.ObjectId,
-//         ref: 'User'
-//       }
-//     ]
+
