@@ -6,9 +6,11 @@ const prisma = require('../prisma.client');
 const getAllTours = async (req, res, next) => {
   try {
     const tours = await prisma.tour.findMany();
-    res
-      .status(200)
-      .json({ status: 'success', requested: req.requestTime, data: { tours } });
+    res.status(200).json({
+      status: 'success',
+      requested: req.requestTime,
+      data: { tours },
+    });
   } catch (error) {
     res.status(400).json({ status: 'error', message: 'Tour not found' });
     next(error);
@@ -22,6 +24,11 @@ const getTour = async (req, res, next) => {
         id: Number(req.params.id),
       },
     });
+    if (!tour) {
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'Tour not found' });
+    }
     res.status(200).json({ status: 'success', data: { tour } });
   } catch (error) {
     res.status(400).json({ status: 'error', message: 'Tour not found' });
@@ -30,8 +37,6 @@ const getTour = async (req, res, next) => {
 };
 
 const addTour = async (req, res, next) => {
-  const { startLocation, ...rest } = req.body;
-
   try {
     const newTour = await prisma.tour.create({
       data: req.body,
@@ -57,6 +62,12 @@ const updateTour = async (req, res, next) => {
         price,
       },
     });
+
+    if (!tour)
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'Tour not found' });
+
     res.status(200).json({ status: 'success', data: { tour: tour } });
   } catch (error) {
     res.status(400).json({ status: 'fail', message: 'Tour not updated' });
@@ -66,11 +77,17 @@ const updateTour = async (req, res, next) => {
 
 const deleteTour = async (req, res, next) => {
   try {
-    await prisma.tour.delete({
+    const tour = await prisma.tour.delete({
       where: {
         id: Number(req.params.id),
       },
     });
+
+    if (!tour)
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'Tour not found' });
+
     res.status(204).json({ status: 'success', data: null });
   } catch (error) {
     res.status(400).json({ status: 'fail', message: 'Tour not found' });
