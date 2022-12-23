@@ -8,19 +8,27 @@ datasource db {
 }
 
 model Tour {
-  id              Int             @id @default(autoincrement())
-  name            String          @unique
+  id              Int      @id @default(autoincrement())
+  name            String   @unique
   duration        Int
   maxGroupSize    Int
   difficulty      String
-  ratingsAverage  Float?          @default(4.5)
+  ratingsAverage  Float?   @default(4.5)
   ratingsQuantity Int?
   price           Int
   summary         String
   description     String?
   imageCover      String
   images          String[]
-  createdAt       DateTime        @default(now()) @db.Date
+  createdAt       DateTime @default(now()) @db.Date
   startDates      String[]
 }
 
+model User {
+  id              Int     @id @default(autoincrement())
+  name            String
+  email           String  @unique
+  password        String
+  passwordConfirm String
+  photo           String?
+}
