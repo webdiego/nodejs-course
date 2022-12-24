@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const prisma = require('../prisma.client');
 
 const signup = async (req, res, next) => {
@@ -21,7 +22,12 @@ const signup = async (req, res, next) => {
           password: hash,
         },
       });
-      res.status(200).json({ status: 'success', data: { user: newUser } });
+      const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      });
+      res
+        .status(200)
+        .json({ status: 'success', data: { user: newUser, token } });
     });
   } catch (error) {
     res.status(400).json({ status: 'fail', message: 'User not created' });
