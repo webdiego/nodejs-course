@@ -29,6 +29,5 @@ model User {
   name            String
   email           String  @unique
   password        String
-  passwordConfirm String
   photo           String?
 }
