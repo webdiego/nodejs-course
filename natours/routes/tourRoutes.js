@@ -10,7 +10,11 @@ const {
   addTour,
 } = require('../controllers/tourController');
 
-router.route('/').get(protect, getAllTours).post(addTour);
-router.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
+router.route('/').get(protect, getAllTours).post(protect, addTour);
+router
+  .route('/:id')
+  .get(protect, getTour)
+  .patch(protect, updateTour)
+  .delete(protect, deleteTour);
 
 module.exports = router;

@@ -1,5 +1,6 @@
 /* eslint-disable node/no-unsupported-features/es-syntax */
 const prisma = require('../prisma.client');
+const errorHandler = require('../utils/errorHandler');
 
 //TODO: add validator--> ZOD?
 
@@ -12,7 +13,7 @@ const getAllTours = async (req, res, next) => {
       data: { tours },
     });
   } catch (error) {
-    res.status(400).json({ status: 'error', message: 'Tour not found' });
+    errorHandler(res, 400, 'Tour not found', error);
     next(error);
   }
 };
@@ -25,13 +26,11 @@ const getTour = async (req, res, next) => {
       },
     });
     if (!tour) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: 'Tour not found' });
+      errorHandler(res, 400, 'Tour not found');
     }
     res.status(200).json({ status: 'success', data: { tour } });
   } catch (error) {
-    res.status(400).json({ status: 'error', message: 'Tour not found' });
+    errorHandler(res, 400, 'Tour not found');
     next(error);
   }
 };
@@ -43,8 +42,7 @@ const addTour = async (req, res, next) => {
     });
     res.status(200).json({ status: 'success', data: { tour: newTour } });
   } catch (error) {
-    res.status(400).json({ status: 'fail', message: 'Tour not created' });
-
+    errorHandler(res, 400, 'Tour not created');
     next(error);
   }
 };
@@ -63,15 +61,14 @@ const updateTour = async (req, res, next) => {
       },
     });
 
-    if (!tour)
-      return res
-        .status(400)
-        .json({ status: 'error', message: 'Tour not found' });
+    if (!tour) {
+      errorHandler(res, 400, 'Tour not found');
+    }
 
     res.status(200).json({ status: 'success', data: { tour: tour } });
-  } catch (error) {
-    res.status(400).json({ status: 'fail', message: 'Tour not updated' });
-    next(error);
+  } catch (err) {
+    errorHandler(res, 400, 'Tour not updated', err);
+    next(err);
   }
 };
 
@@ -83,14 +80,14 @@ const deleteTour = async (req, res, next) => {
       },
     });
 
-    if (!tour)
-      return res
-        .status(400)
-        .json({ status: 'error', message: 'Tour not found' });
+    if (!tour) {
+      errorHandler(res, 400, 'Tour not found');
+    }
 
     res.status(204).json({ status: 'success', data: null });
   } catch (error) {
-    res.status(400).json({ status: 'fail', message: 'Tour not found' });
+    errorHandler(res, 400, 'Tour not found');
+
     next(error);
   }
 };

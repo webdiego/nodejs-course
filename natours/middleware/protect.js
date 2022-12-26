@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const prisma = require('../prisma.client');
+const errorHandler = require('../utils/errorHandler');
 
 const protect = async (req, res, next) => {
   let token;
@@ -18,21 +19,20 @@ const protect = async (req, res, next) => {
       });
       //Check if user still exists
       if (!currentUser) {
-        return res
-          .status(401)
-          .json({ status: 'fail', message: 'User not exist' });
+        errorHandler(res, 401, 'User not exist');
       }
       //Grant access to protected route, pass user to the next middleware function
       req.user = currentUser;
       next();
     } catch (err) {
-      res.status(401).json({ status: 'fail', message: 'Not authorized' });
+      errorHandler(res, 401, 'Not authorized!', err);
+      // res.status(401).json({ status: 'fail', message: 'Not authorized' });
       next(err);
     }
   }
 
   if (!token) {
-    res.status(401).json({ status: 'fail', message: 'Your are not login!' });
+    errorHandler(res, 401, 'Your are not login!');
   }
 };
 
