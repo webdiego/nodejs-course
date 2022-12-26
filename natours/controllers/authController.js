@@ -61,7 +61,6 @@ const login = async (req, res, next) => {
       if (err) {
         res.status(400).json({ status: 'fail', message: 'Psw not match' });
       }
-
       if (result) {
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
           expiresIn: process.env.JWT_EXPIRES_IN,

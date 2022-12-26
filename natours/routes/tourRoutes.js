@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-
+const { protect } = require('../middleware/protect');
 const {
   getAllTours,
   getTour,
@@ -10,10 +10,7 @@ const {
   addTour,
 } = require('../controllers/tourController');
 
-// //Middleware param
-// router.param('id', checkId);
-
-router.route('/').get(getAllTours).post(addTour);
+router.route('/').get(protect, getAllTours).post(addTour);
 router.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
 
 module.exports = router;
