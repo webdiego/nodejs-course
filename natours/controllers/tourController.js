@@ -1,7 +1,6 @@
 /* eslint-disable node/no-unsupported-features/es-syntax */
 const prisma = require('../prisma.client');
 const errorHandler = require('../utils/errorHandler');
-
 //TODO: add validator--> ZOD?
 
 const getAllTours = async (req, res, next) => {
@@ -26,7 +25,7 @@ const getTour = async (req, res, next) => {
       },
     });
     if (!tour) {
-      errorHandler(res, 400, 'Tour not found');
+      return errorHandler(res, 400, 'Tour not found');
     }
     res.status(200).json({ status: 'success', data: { tour } });
   } catch (error) {
@@ -62,7 +61,7 @@ const updateTour = async (req, res, next) => {
     });
 
     if (!tour) {
-      errorHandler(res, 400, 'Tour not found');
+      return errorHandler(res, 400, 'Tour not found');
     }
 
     res.status(200).json({ status: 'success', data: { tour: tour } });
@@ -81,7 +80,7 @@ const deleteTour = async (req, res, next) => {
     });
 
     if (!tour) {
-      errorHandler(res, 400, 'Tour not found');
+      return errorHandler(res, 400, 'Tour not found');
     }
 
     res.status(204).json({ status: 'success', data: null });

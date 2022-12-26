@@ -30,4 +30,12 @@ model User {
   email           String  @unique
   password        String
   photo           String?
+
+  role            Role  @default(USER)
+}
+enum Role {
+  USER
+  ADMIN
+  LEAD_GUIDE
+  GUIDE
 }

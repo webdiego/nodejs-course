@@ -4,15 +4,25 @@ const prisma = require('../prisma.client');
 
 const signup = async (req, res, next) => {
   try {
-    const { name, email, password, passwordConfirm } = req.body;
+    const { name, email, password, passwordConfirm, role } = req.body;
 
     if (password !== passwordConfirm) {
-      res.status(400).json({ status: 'fail', message: 'Psw not match' });
+      return res.status(400).json({ status: 'fail', message: 'Psw not match' });
+    }
+
+    const userAlreadyExist = await prisma.user.findUnique({ where: { email } });
+
+    if (userAlreadyExist) {
+      return res
+        .status(400)
+        .json({ status: 'fail', message: 'User already exist' });
     }
 
     bcrypt.hash(password, 12, async (err, hash) => {
       if (err) {
-        res.status(400).json({ status: 'fail', message: 'Psw not hashed' });
+        return res
+          .status(400)
+          .json({ status: 'fail', message: 'Psw not hashed' });
       }
 
       const newUser = await prisma.user.create({
@@ -20,11 +30,14 @@ const signup = async (req, res, next) => {
           name,
           email,
           password: hash,
+          role: role || 'USER',
         },
       });
+
       const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN,
       });
+
       res
         .status(200)
         .json({ status: 'success', data: { user: newUser, token } });

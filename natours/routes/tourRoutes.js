@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const { protect } = require('../middleware/protect');
+const { protect, restrictTo } = require('../middleware/protect');
 const {
   getAllTours,
   getTour,
@@ -15,6 +15,6 @@ router
   .route('/:id')
   .get(protect, getTour)
   .patch(protect, updateTour)
-  .delete(protect, deleteTour);
+  .delete(protect, restrictTo('ADMIN', 'LEAD-GUIDE'), deleteTour);
 
 module.exports = router;
