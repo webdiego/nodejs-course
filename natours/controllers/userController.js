@@ -35,6 +35,27 @@ const updateMe = async (req, res) => {
     errorHandler(res, 500, 'Error updating user', err);
   }
 };
+/*
+[DELETE] /api/v1/users/deleteMe
+*/
+//Deactivate user
+const deleteMe = async (req, res) => {
+  try {
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        active: false,
+      },
+    });
+
+    res.status(204).json({
+      status: 'success',
+      data: null,
+    });
+  } catch (err) {
+    errorHandler(res, 500, 'Error deleting user', err);
+  }
+};
 
 const getAllUsers = (req, res) => {
   res
@@ -73,4 +94,5 @@ module.exports = {
   deleteUser,
   addUser,
   updateMe,
+  deleteMe,
 };

@@ -53,8 +53,6 @@ const restrictTo =
       );
     }
     next();
-
-    console.log('role', req.user, roles);
   };
 
 module.exports = {

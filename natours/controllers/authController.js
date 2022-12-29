@@ -1,9 +1,9 @@
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const prisma = require('../prisma.client');
 const errorHandler = require('../utils/errorHandler');
 const createPswResetToken = require('../utils/createPswResetToken');
 const sendEmail = require('../service/email');
+const signSendToken = require('../utils/signSendToken');
 
 /*
 POST /api/v1/users/signup
@@ -37,15 +37,9 @@ const signup = async (req, res, next) => {
           password: hash,
           role: role || 'USER',
         },
+        select: { name: true, email: true, role: true },
       });
-
-      const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-      });
-
-      res
-        .status(200)
-        .json({ status: 'success', data: { user: newUser, token } });
+      return signSendToken(newUser, res, 200);
     });
   } catch (err) {
     errorHandler(res, 400, 'User not created');
@@ -83,10 +77,7 @@ const login = async (req, res, next) => {
       if (err || !result) {
         return errorHandler(res, 400, 'Psw not match');
       }
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-      });
-      res.status(200).json({ status: 'success', data: { user, token } });
+      return signSendToken(user, res, 200);
     });
   } catch (error) {
     errorHandler(res, 400, 'User not logged in');
@@ -181,7 +172,7 @@ const resetPassword = async (req, res, next) => {
         return errorHandler(res, 500, 'Psw not hashed');
       }
 
-      const updatedUser = await prisma.user.update({
+      await prisma.user.update({
         where: { id: getUser.id },
         data: {
           password: hash,
@@ -193,13 +184,7 @@ const resetPassword = async (req, res, next) => {
         },
       });
 
-      const token = jwt.sign({ id: updatedUser.id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-      });
-
-      res
-        .status(200)
-        .json({ status: 'success', message: 'Psw changed', token });
+      res.status(200).json({ status: 'success', message: 'Psw changed' });
     });
   } catch (err) {
     errorHandler(res, 500, 'Something went wrong', err);
@@ -246,13 +231,8 @@ const updatePassword = async (req, res, next) => {
               password: hash,
             },
           });
-          const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-            expiresIn: process.env.JWT_EXPIRES_IN,
-          });
-          console.log('token', token, 'user', user);
-          res
-            .status(200)
-            .json({ status: 'success', message: 'Psw changed', token });
+
+          res.status(200).json({ status: 'success', message: 'Psw changed' });
         });
       }
     });
