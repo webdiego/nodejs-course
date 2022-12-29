@@ -13,6 +13,8 @@ const signup = async (req, res, next) => {
   try {
     const { name, email, password, passwordConfirm, role } = req.body;
 
+    //TODO: check if email is valid
+
     if (password !== passwordConfirm) {
       return errorHandler(res, 400, 'Psw not match');
     }
@@ -57,7 +59,6 @@ const signup = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
-  console.log('LOGIN', email, password);
   try {
     // 1) Check if email and password exist
     if (!email || !password) {
@@ -73,27 +74,19 @@ const login = async (req, res, next) => {
         password: true,
       },
     });
-
     if (!user) {
       return errorHandler(res, 404, 'User not found');
     }
 
     // 3) If everything ok, send token to client
     bcrypt.compare(password, user.password, async (err, result) => {
-      if (err) {
+      if (err || !result) {
         return errorHandler(res, 400, 'Psw not match');
       }
-      console.log('insidebcrypot', result);
-
-      if (result) {
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-          expiresIn: process.env.JWT_EXPIRES_IN,
-        });
-        console.log('inside result', token, 'user', user);
-        res.status(200).json({ status: 'success', data: { user, token } });
-      } else {
-        return errorHandler(res, 400, 'No result,Psw not match');
-      }
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      });
+      res.status(200).json({ status: 'success', data: { user, token } });
     });
   } catch (error) {
     errorHandler(res, 400, 'User not logged in');
@@ -220,7 +213,6 @@ const resetPassword = async (req, res, next) => {
 
 const updatePassword = async (req, res, next) => {
   const { passwordCurrent, password, passwordConfirm } = req.body;
-  console.log(req.user);
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
