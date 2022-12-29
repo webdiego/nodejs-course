@@ -20,19 +20,22 @@ model Tour {
   description     String?
   imageCover      String
   images          String[]
-  createdAt       DateTime @default(now()) @db.Date
+  createdAt       DateTime @default(now()) @db.Date()
   startDates      String[]
 }
 
 model User {
-  id              Int     @id @default(autoincrement())
-  name            String
-  email           String  @unique
-  password        String
-  photo           String?
+  id                   Int       @id @default(autoincrement())
+  name                 String
+  email                String    @unique
+  password             String
+  photo                String?
+  passwordResetToken   String?
+  passwordResetExpires DateTime? @db.Timestamp()
 
-  role            Role  @default(USER)
+  role Role @default(USER)
 }
+
 enum Role {
   USER
   ADMIN

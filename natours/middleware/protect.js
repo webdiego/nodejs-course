@@ -16,6 +16,12 @@ const protect = async (req, res, next) => {
       //Get user from the token
       const currentUser = await prisma.user.findUnique({
         where: { id: decoded.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
       });
       //Check if user still exists
       if (!currentUser) {

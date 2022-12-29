@@ -1,28 +1,31 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const prisma = require('../prisma.client');
+const errorHandler = require('../utils/errorHandler');
+const createPswResetToken = require('../utils/createPswResetToken');
+const sendEmail = require('../service/email');
+
+/*
+POST /api/v1/users/signup
+*/
 
 const signup = async (req, res, next) => {
   try {
     const { name, email, password, passwordConfirm, role } = req.body;
 
     if (password !== passwordConfirm) {
-      return res.status(400).json({ status: 'fail', message: 'Psw not match' });
+      return errorHandler(res, 400, 'Psw not match');
     }
 
     const userAlreadyExist = await prisma.user.findUnique({ where: { email } });
 
     if (userAlreadyExist) {
-      return res
-        .status(400)
-        .json({ status: 'fail', message: 'User already exist' });
+      return errorHandler(res, 400, 'User already exist');
     }
 
     bcrypt.hash(password, 12, async (err, hash) => {
       if (err) {
-        return res
-          .status(400)
-          .json({ status: 'fail', message: 'Psw not hashed' });
+        return errorHandler(res, 500, 'Psw not hashed');
       }
 
       const newUser = await prisma.user.create({
@@ -42,18 +45,23 @@ const signup = async (req, res, next) => {
         .status(200)
         .json({ status: 'success', data: { user: newUser, token } });
     });
-  } catch (error) {
-    res.status(400).json({ status: 'fail', message: 'User not created' });
-    next(error);
+  } catch (err) {
+    errorHandler(res, 400, 'User not created');
+    return next(err);
   }
 };
 
+/*
+[POST] /api/v1/users/login
+*/
+
 const login = async (req, res, next) => {
+  const { email, password } = req.body;
+  console.log('LOGIN', email, password);
   try {
-    const { email, password } = req.body;
     // 1) Check if email and password exist
     if (!email || !password) {
-      res.status(400).json({ status: 'fail', message: 'Email or psw missing' });
+      return errorHandler(res, 400, 'Email or psw missing');
     }
     // 2) Check if user exists with that email
     const user = await prisma.user.findUnique({
@@ -67,27 +75,205 @@ const login = async (req, res, next) => {
     });
 
     if (!user) {
-      res.status(400).json({ status: 'fail', message: 'User not found' });
+      return errorHandler(res, 404, 'User not found');
     }
+
     // 3) If everything ok, send token to client
-    bcrypt.compare(password, user.password, (err, result) => {
+    bcrypt.compare(password, user.password, async (err, result) => {
       if (err) {
-        res.status(400).json({ status: 'fail', message: 'Psw not match' });
+        return errorHandler(res, 400, 'Psw not match');
       }
+      console.log('insidebcrypot', result);
+
       if (result) {
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
           expiresIn: process.env.JWT_EXPIRES_IN,
         });
+        console.log('inside result', token, 'user', user);
         res.status(200).json({ status: 'success', data: { user, token } });
+      } else {
+        return errorHandler(res, 400, 'No result,Psw not match');
       }
     });
   } catch (error) {
-    res.status(400).json({ status: 'fail', message: 'User not logged in' });
+    errorHandler(res, 400, 'User not logged in');
     next(error);
+  }
+};
+
+/*
+[POST] /api/v1/users/forgotPassword
+*/
+const forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    // 1) Get user based on POSTed email
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+    if (!user) {
+      return errorHandler(res, 404, 'User not found!');
+    }
+    // 2) If user exists, generate the random reset token
+    const passwordResetToken = createPswResetToken();
+    const currentDate = new Date();
+    const passwordResetExpires = new Date(
+      currentDate.getTime() + 10 * 60 * 1000
+    );
+
+    await prisma.user.update({
+      where: { email },
+      data: {
+        passwordResetToken,
+        passwordResetExpires,
+      },
+    });
+
+    // 3) Send it to user's email
+    const resetURL = `${req.protocol}://${req.get(
+      'host'
+    )}/api/v1/users/resetPassword/${passwordResetToken}`;
+
+    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL} . If you didn't forget your password, please ignore this email!`;
+
+    await sendEmail({
+      email: user.email,
+      subject: 'Your password reset token (valid for 10 min)',
+      message,
+    });
+
+    res.status(200).json({ status: 'success', message: 'Token sent to email' });
+  } catch (err) {
+    errorHandler(
+      res,
+      500,
+      `There was an erro sending the email. Try again later`,
+      err
+    );
+    return next(err);
+  }
+};
+
+/*
+[PATCH] /api/v1/users/resetPassword/:token
+*/
+
+const resetPassword = async (req, res, next) => {
+  // 1) Get user based on the token
+  const { password, passwordConfirm } = req.body;
+
+  try {
+    const getUser = await prisma.user.findFirst({
+      where: { passwordResetToken: req.params.token },
+      select: {
+        id: true,
+        email: true,
+        passwordResetExpires: true,
+      },
+    });
+
+    if (!getUser) {
+      return errorHandler(res, 400, 'Not user with this token');
+    }
+    if (getUser.passwordResetExpires < new Date()) {
+      return errorHandler(res, 400, 'Token is invalid or has expired');
+    }
+    if (password !== passwordConfirm) {
+      return errorHandler(res, 400, 'Psw not match');
+    }
+
+    // 2) If token has not expired, and there is user, set the new password
+    bcrypt.hash(password, 12, async (err, hash) => {
+      if (err) {
+        return errorHandler(res, 500, 'Psw not hashed');
+      }
+
+      const updatedUser = await prisma.user.update({
+        where: { id: getUser.id },
+        data: {
+          password: hash,
+          passwordResetToken: null,
+          passwordResetExpires: null,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      const token = jwt.sign({ id: updatedUser.id }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      });
+
+      res
+        .status(200)
+        .json({ status: 'success', message: 'Psw changed', token });
+    });
+  } catch (err) {
+    errorHandler(res, 500, 'Something went wrong', err);
+    return next(err);
+  }
+};
+
+/*
+[PATCH] /api/v1/users/updatePassword
+*/
+
+const updatePassword = async (req, res, next) => {
+  const { passwordCurrent, password, passwordConfirm } = req.body;
+  console.log(req.user);
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        password: true,
+      },
+    });
+
+    if (!user) {
+      return errorHandler(res, 404, 'User not found');
+    }
+
+    if (password !== passwordConfirm) {
+      return errorHandler(res, 400, 'Psw not match');
+    }
+
+    bcrypt.compare(passwordCurrent, user.password, async (err, result) => {
+      if (err) {
+        return errorHandler(res, 400, 'Psw not match');
+      }
+
+      if (result) {
+        bcrypt.hash(password, 12, async (hashErr, hash) => {
+          if (hashErr) {
+            return errorHandler(res, 500, 'Psw not hashed');
+          }
+
+          await prisma.user.update({
+            where: { id: req.user.id },
+            data: {
+              password: hash,
+            },
+          });
+          const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+            expiresIn: process.env.JWT_EXPIRES_IN,
+          });
+          console.log('token', token, 'user', user);
+          res
+            .status(200)
+            .json({ status: 'success', message: 'Psw changed', token });
+        });
+      }
+    });
+  } catch (err) {
+    errorHandler(res, 500, 'Something went wrong', err);
+    return next(err);
   }
 };
 
 module.exports = {
   signup,
   login,
+  forgotPassword,
+  resetPassword,
+  updatePassword,
 };
