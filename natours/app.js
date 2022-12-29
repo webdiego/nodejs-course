@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const notFound = require('./middleware/notFound');
@@ -14,12 +15,18 @@ const limiter = rateLimit({
 
 const app = express();
 
-// Middleware
+//Security HTTP headers
+app.use(helmet());
+
+//Development logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev')); // GET /api/v1/tours 200 1.637 ms - 8628
 }
+//Limit requests from same API
 app.use('/api', limiter);
-app.use(express.json());
+
+//Body parser, reading data from body into req.body
+app.use(express.json({ limit: '10kb' }));
 
 //Routes
 app.use('/api/v1/tours', tourRouter); //tourRouter & userRouter are middleware
