@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
@@ -7,7 +7,7 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-dotenv.config({ path: './.env' });
+dotenv.config();
 // console.log(app.get('env')); //development set by express
 // console.log(process.env); // from node
 
