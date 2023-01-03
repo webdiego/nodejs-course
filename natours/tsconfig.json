@@ -6,7 +6,11 @@
     "rootDir": "./src",
     "outDir": "./build",
     "sourceMap": true,
-    "strict": false
+    "strict": false,
+    "esModuleInterop": true
+  },
+  "ts-node": {
+    "esm": true
   },
   "include": ["./src/**/*"]
 }

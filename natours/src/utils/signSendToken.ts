@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import {  Response } from 'express';
+import { Response } from 'express';
 
 export const signSendToken = (
   user: { id?: number; role?: string },
@@ -29,5 +29,3 @@ export const signSendToken = (
     },
   });
 };
-
-module.exports = signSendToken;
