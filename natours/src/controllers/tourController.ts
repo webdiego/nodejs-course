@@ -1,14 +1,15 @@
 /* eslint-disable node/no-unsupported-features/es-syntax */
-import { prisma } from '../prisma.client';
-import { errorHandler } from '../utils/errorHandler';
+import { prisma } from '../prisma.client.js';
+import { errorHandler } from '../utils/errorHandler.js';
+import { Request, Response, NextFunction } from 'express';
+
 //TODO: add validator--> ZOD?
 
-const getAllTours = async (req, res, next) => {
+const getAllTours = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const tours = await prisma.tour.findMany();
     res.status(200).json({
       status: 'success',
-      requested: req.requestTime,
       data: { tours },
     });
   } catch (error) {
@@ -17,7 +18,7 @@ const getAllTours = async (req, res, next) => {
   }
 };
 
-const getTour = async (req, res, next) => {
+const getTour = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const tour = await prisma.tour.findUnique({
       where: {
@@ -34,7 +35,7 @@ const getTour = async (req, res, next) => {
   }
 };
 
-const addTour = async (req, res, next) => {
+const addTour = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const newTour = await prisma.tour.create({
       data: req.body,
@@ -46,7 +47,7 @@ const addTour = async (req, res, next) => {
   }
 };
 
-const updateTour = async (req, res, next) => {
+const updateTour = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { name, rating, price } = req.body;
     const tour = await prisma.tour.update({
@@ -55,6 +56,7 @@ const updateTour = async (req, res, next) => {
       },
       data: {
         name,
+
         price,
       },
     });
@@ -70,7 +72,7 @@ const updateTour = async (req, res, next) => {
   }
 };
 
-const deleteTour = async (req, res, next) => {
+const deleteTour = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const tour = await prisma.tour.delete({
       where: {

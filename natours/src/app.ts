@@ -1,10 +1,10 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Application } from 'express';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-import { router as tourRouter } from './routes/tourRoutes';
-import { router as userRouter } from './routes/userRoutes';
-import { notFound } from './middleware/notFound';
+import { router as tourRouter } from './routes/tourRoutes.js';
+import { router as userRouter } from './routes/userRoutes.js';
+import { notFound } from './middleware/notFound.js';
 
 //Rate limiter
 const limiter = rateLimit({
@@ -13,7 +13,7 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again in an hour!',
 });
 
-const app = express();
+const app: Application = express();
 
 //Security HTTP headers
 app.use(helmet());

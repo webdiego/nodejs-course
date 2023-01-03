@@ -1,15 +1,16 @@
 import bcrypt from 'bcrypt';
-import { prisma } from '../prisma.client';
-import { errorHandler } from '../utils/errorHandler';
-import { createPswResetToken } from '../utils/createPswResetToken';
-import { sendEmail } from '../service/email';
-import { signSendToken } from '../utils/signSendToken';
-
+import { prisma } from '../prisma.client.js';
+import { errorHandler } from '../utils/errorHandler.js';
+import { createPswResetToken } from '../utils/createPswResetToken.js';
+import { sendEmail } from '../service/email.js';
+import { signSendToken } from '../utils/signSendToken.js';
+import { Request, Response, NextFunction } from 'express';
+import { UserRequest } from '../types/index.js';
 /*
 POST /api/v1/users/signup
 */
 
-const signup = async (req, res, next) => {
+const signup = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { name, email, password, passwordConfirm, role } = req.body;
 
@@ -51,7 +52,7 @@ const signup = async (req, res, next) => {
 [POST] /api/v1/users/login
 */
 
-const login = async (req, res, next) => {
+const login = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
   try {
     // 1) Check if email and password exist
@@ -88,7 +89,11 @@ const login = async (req, res, next) => {
 /*
 [POST] /api/v1/users/forgotPassword
 */
-const forgotPassword = async (req, res, next) => {
+const forgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { email } = req.body;
   try {
     // 1) Get user based on POSTed email
@@ -142,7 +147,11 @@ const forgotPassword = async (req, res, next) => {
 [PATCH] /api/v1/users/resetPassword/:token
 */
 
-const resetPassword = async (req, res, next) => {
+const resetPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   // 1) Get user based on the token
   const { password, passwordConfirm } = req.body;
 
@@ -196,7 +205,11 @@ const resetPassword = async (req, res, next) => {
 [PATCH] /api/v1/users/updatePassword
 */
 
-const updatePassword = async (req, res, next) => {
+const updatePassword = async (
+  req: UserRequest,
+  res: Response,
+  next: NextFunction
+) => {
   const { passwordCurrent, password, passwordConfirm } = req.body;
   try {
     const user = await prisma.user.findUnique({

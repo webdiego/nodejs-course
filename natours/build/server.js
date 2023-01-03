@@ -1,14 +1,14 @@
-const dotenv = require('dotenv');
+import * as dotenv from 'dotenv';
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
     console.log('UNCAUGHT EXCEPTION!(sync)💥 Shutting down...');
     console.log(err.name, err.message);
     process.exit(1);
 });
-dotenv.config({ path: './.env' });
+dotenv.config();
 // console.log(app.get('env')); //development set by express
 // console.log(process.env); // from node
-const app = require('./app');
+import { app } from './app.js';
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
     console.log(`Listen on port ${port}`);
@@ -22,3 +22,4 @@ process.on('unhandledRejection', (err) => {
         process.exit(1);
     });
 });
+//# sourceMappingURL=server.js.map

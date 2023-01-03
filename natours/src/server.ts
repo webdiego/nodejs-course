@@ -11,7 +11,7 @@ dotenv.config();
 // console.log(app.get('env')); //development set by express
 // console.log(process.env); // from node
 
-import { app } from './app';
+import { app } from './app.js';
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {

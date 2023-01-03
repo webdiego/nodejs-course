@@ -1,13 +1,7 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.signSendToken = void 0;
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const signSendToken = (user, res, statusCode = 200) => {
+import jwt from 'jsonwebtoken';
+export const signSendToken = (user, res, statusCode = 200) => {
     //Expires in 24h
-    const token = jsonwebtoken_1.default.sign({ id: user.id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN,
     });
     const cookieOptions = {
@@ -27,5 +21,5 @@ const signSendToken = (user, res, statusCode = 200) => {
         },
     });
 };
-exports.signSendToken = signSendToken;
-module.exports = exports.signSendToken;
+module.exports = signSendToken;
+//# sourceMappingURL=signSendToken.js.map

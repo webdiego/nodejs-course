@@ -1,9 +1,15 @@
-import jwt from 'jsonwebtoken';
-import { prisma } from '../prisma.client';
-import { errorHandler } from '../utils/errorHandler';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import { prisma } from '../prisma.client.js';
+import { errorHandler } from '../utils/errorHandler.js';
+import { Response, NextFunction } from 'express';
+import { UserRequest } from '../types/index.js';
 
-export const protect = async (req, res, next) => {
-  let token;
+export const protect = async (
+  req: UserRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  let token: string;
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
@@ -12,8 +18,16 @@ export const protect = async (req, res, next) => {
       //Get token from header
       token = req.headers.authorization.split(' ')[1];
       //verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded: string | JwtPayload = jwt.verify(
+        token,
+        process.env.JWT_SECRET
+      );
       //Get user from the token
+
+      if (typeof decoded === 'string') {
+        return errorHandler(res, 401, 'Invalid token');
+      }
+
       const currentUser = await prisma.user.findUnique({
         where: { id: decoded.id },
         select: {
@@ -43,8 +57,8 @@ export const protect = async (req, res, next) => {
 };
 
 export const restrictTo =
-  (...roles) =>
-  (req, res, next) => {
+  (...roles: string[]) =>
+  (req: UserRequest, res: Response, next: NextFunction) => {
     if (!roles.includes(req.user.role)) {
       return errorHandler(
         res,

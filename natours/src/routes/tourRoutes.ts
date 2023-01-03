@@ -1,14 +1,14 @@
 import express, { Router } from 'express';
 
 const router: Router = express.Router();
-import { protect, restrictTo } from '../middleware/protect';
+import { protect, restrictTo } from '../middleware/protect.js';
 import {
   getAllTours,
   getTour,
   updateTour,
   deleteTour,
   addTour,
-} from '../controllers/tourController';
+} from '../controllers/tourController.js';
 
 router.route('/').get(protect, getAllTours).post(protect, addTour);
 router

@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { protect } from '../middleware/protect';
+import { protect } from '../middleware/protect.js';
 
 const router: Router = express.Router();
 
@@ -11,7 +11,7 @@ import {
   updateUser,
   deleteUser,
   addUser,
-} from '../controllers/userController';
+} from '../controllers/userController.js';
 
 //Auth controller
 import {
@@ -20,7 +20,7 @@ import {
   forgotPassword,
   resetPassword,
   updatePassword,
-} from '../controllers/authController';
+} from '../controllers/authController.js';
 
 //Auth routes
 router.post('/signup', signup);

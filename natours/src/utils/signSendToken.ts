@@ -1,6 +1,11 @@
 import jwt from 'jsonwebtoken';
+import {  Response } from 'express';
 
-export const signSendToken = (user, res, statusCode = 200) => {
+export const signSendToken = (
+  user: { id?: number; role?: string },
+  res: Response,
+  statusCode: number = 200
+) => {
   //Expires in 24h
   const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,

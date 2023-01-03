@@ -1,10 +1,12 @@
-import { errorHandler } from '../utils/errorHandler';
-import { prisma } from '../prisma.client';
+import { errorHandler } from '../utils/errorHandler.js';
+import { prisma } from '../prisma.client.js';
+import { Request, Response } from 'express';
+import { UserRequest } from '../types/index.js';
 
 /*
 [PATCH] /api/v1/users/updateMe
 */
-const updateMe = async (req, res) => {
+const updateMe = async (req: UserRequest, res: Response) => {
   // 1) Create error if user POSTs password data
   if (req.body.password || req.body.passwordConfirm) {
     return errorHandler(
@@ -39,7 +41,7 @@ const updateMe = async (req, res) => {
 [DELETE] /api/v1/users/deleteMe
 */
 //Deactivate user
-const deleteMe = async (req, res) => {
+const deleteMe = async (req: UserRequest, res: Response) => {
   try {
     await prisma.user.update({
       where: { id: req.user.id },
@@ -57,31 +59,31 @@ const deleteMe = async (req, res) => {
   }
 };
 
-const getAllUsers = (req, res) => {
+const getAllUsers = (req: Request, res: Response) => {
   res
     .status(500)
     .json({ status: 'error', message: 'Route is not yet defined' });
 };
 
-const getUser = (req, res) => {
+const getUser = (req: Request, res: Response) => {
   res
     .status(500)
     .json({ status: 'error', message: 'Route is not yet defined' });
 };
 
-const addUser = (req, res) => {
+const addUser = (req: Request, res: Response) => {
   res
     .status(500)
     .json({ status: 'error', message: 'Route is not yet defined' });
 };
 
-const updateUser = (req, res) => {
+const updateUser = (req: Request, res: Response) => {
   res
     .status(500)
     .json({ status: 'error', message: 'Route is not yet defined' });
 };
 
-const deleteUser = (req, res) => {
+const deleteUser = (req: Request, res: Response) => {
   res
     .status(500)
     .json({ status: 'error', message: 'Route is not yet defined' });
